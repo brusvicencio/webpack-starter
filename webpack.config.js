@@ -1,52 +1,62 @@
-const HtmlWebPack           = require('html-webpack-plugin')
-const MiniCssExtractPlugin  = require("mini-css-extract-plugin");
-const CopyPlugin            = require("copy-webpack-plugin");
-module.exports={
-    mode:'development',
-    output:{
-        clean:true
+const HtmlWebPackPlugin       = require('html-webpack-plugin'); 
+const MiniCssExtractPlugin    = require('mini-css-extract-plugin');
+const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+
+module.exports = {
+    mode: 'development',
+    optimization: {
+        minimizer: [ new OptimizeCssAssetsPlugin() ]
     },
-    module:{
-        rules:[
+    module: {
+        rules: [
             {
-                test:/\.html$/,
-                loader:'html-loader',
-                options:{
-                    sources:false
-                }
+                test: /\.css$/,
+                exclude: /styles\.css$/,
+                use: [
+                    'style-loader',
+                    'css-loader'
+                ]
             },
             {
-                test:/\.css$/,
-                exclude : /styles.css$/,
-                use:['style-loader','css-loader']
+                test: /styles\.css$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader'
+                ]
             },
             {
-                test:/styles.css$/,
-                use:[MiniCssExtractPlugin.loader,'css-loader']
+                test: /\.html$/,
+                use: [
+                    {
+                        loader: 'html-loader',
+                        options: { minimize: false }
+                    }
+                ]
             },
             {
-                test:/\.(png|jpe?g|gif)$/,
-                use:['file-loader']
+                test: /\.(png|svg|jpg|gif)$/,
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            esModule: false,
+                            name: 'assets/[name].[ext]'
+                        }
+                    }
+                ]
             }
         ]
     },
-    optimization:{},
-    plugins:[
-        new HtmlWebPack({
-            title:'brusapp',
-            // filename:'index.html'
-            template:'./src/index.html'
+    plugins: [
+        new HtmlWebPackPlugin({
+            template: './src/index.html',
+            filename: './index.html'
         }),
         new MiniCssExtractPlugin({
-            filename:'nuevo-estilo.css',
-            ignoreOrder:false
-        }),
-        new CopyPlugin({
-            patterns: [ 
-            { from: 'src/assets/' , to:'assets/' }
-            ]
-
+            filename: '[name].css',
+            ignoreOrder: false
         })
-    ],
+    ]
 
 }
+
